@@ -8,6 +8,7 @@ use crate::{
 };
 use log::{debug, trace};
 use regex::Regex;
+use reqwest::Url;
 use std::{default::Default, fs, io};
 use tui::{
     layout::{Alignment, Rect},
@@ -313,9 +314,16 @@ impl App {
         path: String,
         layout: JexLayout,
     ) -> Result<(), Box<dyn std::error::Error>> {
-        let f = fs::File::open(&path)?;
-        let r = io::BufReader::new(f);
-        let new_tree = ViewTree::new_from_reader(r, path, layout)?;
+        let new_tree = if let Ok(url) = Url::parse(&path.as_str()) {
+            let body = reqwest::blocking::get(url.as_str())?;
+            let new_tree = ViewTree::new_from_reader(body, path, layout)?;
+            new_tree
+        } else {
+            let f = fs::File::open(&path)?;
+            let buf = io::BufReader::new(f);
+            let new_tree = ViewTree::new_from_reader(buf, path, layout)?;
+            new_tree
+        };
         self.views.trees.push(new_tree);
         self.left_index = ViewForestIndex {
             tree: self.views.trees.len() - 1,

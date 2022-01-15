@@ -15,6 +15,7 @@ use jex::{
 };
 use log::{debug, warn};
 use regex::Regex;
+use reqwest::Url;
 use simplelog::WriteLogger;
 use std::{
     default::Default,
@@ -248,13 +249,23 @@ fn run(json_path: String) -> Result<(), Box<dyn Error>> {
         default_panic_handler(p);
     }));
     let _defer = DeferRestoreTerminal {};
-    let f = fs::File::open(&json_path)?;
-    let r = io::BufReader::new(f);
     let stdout = io::stdout();
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
     let initial_layout = JexLayout::new(terminal.get_frame().size(), false);
-    let mut app = App::new(r, json_path, initial_layout)?;
+
+    // NOTE: see also open_file, can these be refactored to one?
+    let mut app = if let Ok(url) = Url::parse(&json_path.as_str()) {
+        let body = reqwest::blocking::get(url.as_str())?;
+        let app = App::new(body, json_path, initial_layout)?;
+        app
+    } else {
+        let f = fs::File::open(&json_path)?;
+        let buf = io::BufReader::new(f);
+        let app = App::new(buf, json_path, initial_layout)?;
+        app
+    };
+
     terminal.draw(app.render(AppRenderMode::Normal))?;
     let project_dirs =
         directories::ProjectDirs::from("", "", "jex").ok_or("Error getting project dirs")?;
