@@ -3,6 +3,8 @@ Jex
 
 Jex is an interactive tool for querying json files. It shows a json file in one pane, and the results of a [JQ query](https://stedolan.github.io/jq/manual/) on the right. You can update the query on the fly, allowing you to quickly iterate on your query and find out exactly what you're looking for.
 
+If the file path is a valid url, a synchronous request will be made which assumes json was the exclusive response format.
+
 Installing
 ----------
 
@@ -31,6 +33,7 @@ Once you've installed jex, you can use it to open a json file by running `jex ex
 - +: Add a new child to the selected view
 - r: Rename the current view
 - s: Save the current view
+- o: Open file
 - Home: Scroll to the top
 - End: Scroll to the bottom
 - Esc: Quit jex (or leave the query editor)

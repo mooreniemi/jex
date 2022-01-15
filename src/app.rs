@@ -315,6 +315,7 @@ impl App {
         layout: JexLayout,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let new_tree = if let Ok(url) = Url::parse(&path.as_str()) {
+            // TODO: if we want to send a json payload in, how best to do that?
             let body = reqwest::blocking::get(url.as_str())?;
             let new_tree = ViewTree::new_from_reader(body, path, layout)?;
             new_tree

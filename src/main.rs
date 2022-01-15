@@ -413,7 +413,7 @@ fn run(json_path: String) -> Result<(), Box<dyn Error>> {
             KeyCode::Char('o') => {
                 terminal.draw(app.render(AppRenderMode::InputEditor))?;
                 let flash = {
-                    match open_rl.editor.readline("Open:") {
+                    match open_rl.editor.readline("Open: ") {
                         Ok(path) => app.open_file(path, layout).err().map(|err| err.to_string()),
                         Err(_) => None,
                     }
